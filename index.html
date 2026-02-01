@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Aura AI</title>
+  <style>
+    body { font-family: Arial; background:#111; color:white; }
+    .box { width:400px; margin:100px auto; }
+    input, button { width:100%; padding:10px; margin-top:10px; }
+    #out { margin-top:20px; white-space: pre-line; }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h2>🤖 Aura AI</h2>
+  <input id="q" placeholder="Type your question..." />
+  <button id="askBtn">Ask</button>
+  <button id="resetBtn">Reset Chat</button>
+  <div id="out"></div>
+</div>
+
+<script>
+const askBtn = document.getElementById("askBtn");
+const resetBtn = document.getElementById("resetBtn");
+const outDiv = document.getElementById("out");
+const inputQ = document.getElementById("q");
+
+// ---------------- ASK BUTTON ----------------
+askBtn.addEventListener("click", async () => {
+    const question = inputQ.value.trim();
+    if (!question) return;
+
+    try {
+        const res = await fetch("http://127.0.0.1:8000/ask", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question: question })
+        });
+
+
+        if (!res.ok) {
+            outDiv.innerText = "Aura: Error contacting backend";
+            return;
+        }
+
+        const data = await res.json();
+        console.log("API response:", data);
+        outDiv.innerText = "Aura: " + (data.reply || "No response");
+
+    } catch (err) {
+        console.error("Fetch error:", err);
+        outDiv.innerText = "Aura: Error calling API";
+    }
+});
+
+// ---------------- RESET BUTTON ----------------
+resetBtn.addEventListener("click", async () => {
+    try {
+        await fetch("http://127.0.0.1:8000/reset", { method: "POST" });
+        outDiv.innerText = "";
+        inputQ.value = "";
+    } catch (err) {
+        console.error("Error resetting chat:", err);
+    }
+});
+</script>
+
+</body>
+</html>
